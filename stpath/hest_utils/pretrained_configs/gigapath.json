@@ -1,0 +1,9 @@
+{
+    "name": "gigapath",
+    "img_norm": "imagenet",
+    "loader": "gigapath",
+    "loader_kwargs": {
+        "model_name": "vit_giant_patch14_dinov2"
+    },
+    "checkpoint_path": ""
+}
