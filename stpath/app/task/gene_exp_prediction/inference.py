@@ -82,8 +82,6 @@ def run(args):
         row["id"]: {"tech": row["st_technology"], "organ": row["organ"], "specie": row["species"], "source": "hest"}
         for _, row in meta_data.iterrows()
     }
-    print(niche_dict["INT1"])
-    input()
 
     tokenizer = TokenizerTools(
         ge_tokenizer=GeneExpTokenizer(args.gene_voc_path),
