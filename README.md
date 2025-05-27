@@ -2,13 +2,13 @@
 
 This is our PyTorch implementation for the paper:
 
-> Tinglin Huang, Tianyu Liu, Mehrtash Babadi, Rex Ying, and Wengong Jin (2025). STPath: A Generative Foundation Model for Integrating Spatial Transcriptomics and Whole Slide Images. Paper in [bioRxiv](https://www.biorxiv.org/content/biorxiv/early/2025/04/24/2025.04.19.649665.full.pdf).
+> Tinglin Huang, Tianyu Liu, Mehrtash Babadi, Rex Ying, and Wengong Jin (2025). STPath: A Generative Foundation Model for Integrating Spatial Transcriptomics and Whole Slide Images. Paper in [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.04.19.649665v2.abstract).
 
 ## Dataset Preparation
 
 First, download the datasets from the following links:
 
-```
+```python
 import datasets
 from huggingface_hub import snapshot_download
 
@@ -54,7 +54,7 @@ pip install -e .
 
 We provide an easy-to-use interface for users to perform inference on the pre-trained model, which can be found in `app/pipeline/inference.py`. Specifically, the following code snippet shows how to use it:
 
-```
+```python
 from stpath.app.pipeline.inference import STPathInference
 
 agent = STPathInference(
@@ -86,7 +86,7 @@ If the organ type or the tech type is unknown, you can set them to `None` in the
 
 Here, we provide an example of how to perform inference on a [sample](https://github.com/Graph-and-Geometric-Learning/STPath/tree/main/example_data) from the HEST dataset:
 
-```
+```python
 from scipy.stats import pearsonr
 from stpath.hest_utils.st_dataset import load_adata
 from stpath.hest_utils.file_utils import read_assets_from_h5
@@ -125,7 +125,7 @@ print(f"Pearson correlation for {sample_id}: {np.mean(all_pearson_list)}")  # 0.
 
 STPath also support in-context learning, which allows users to provide the expression of a few spots to guide the model to predict the expression of other spots:
 
-```
+```python
 rightest_coord = np.where(coords[:, 0] == coords[:, 0].max())[0][0]
 masked_ids = PatchSampler.sample_nearest_patch(coords, int(len(coords) * 0.95), rightest_coord)  # predict the expression of the 95% spots
 context_ids = np.setdiff1d(np.arange(len(coords)), masked_ids)  # the index not in masked_ids will be used as context
