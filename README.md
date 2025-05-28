@@ -126,6 +126,8 @@ print(f"Pearson correlation for {sample_id}: {np.mean(all_pearson_list)}")  # 0.
 STPath also support in-context learning, which allows users to provide the expression of a few spots to guide the model to predict the expression of other spots:
 
 ```python
+from stpath.data.sampling_utils import PatchSampler
+
 rightest_coord = np.where(coords[:, 0] == coords[:, 0].max())[0][0]
 masked_ids = PatchSampler.sample_nearest_patch(coords, int(len(coords) * 0.95), rightest_coord)  # predict the expression of the 95% spots
 context_ids = np.setdiff1d(np.arange(len(coords)), masked_ids)  # the index not in masked_ids will be used as context
