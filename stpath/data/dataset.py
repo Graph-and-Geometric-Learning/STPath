@@ -64,18 +64,20 @@ class STData:
     gene_exp: torch.Tensor | None = None
     obs_gene_ids: torch.Tensor | None = None  # observed gene ids in this sample
     hvg_ids: torch.Tensor | None = None
+    hvg_gene_names: List | None = None
     tech_ids: torch.Tensor | None = None
     specie_ids: torch.Tensor | None = None
     organ_ids: torch.Tensor | None = None
     cancer_anno_ids: torch.Tensor | None = None
     domain_anno_ids: torch.Tensor | None = None
     
-    def __init__(self, features, coords, gene_exp, obs_gene_ids, hvg_ids, tech_ids, specie_ids, organ_ids, cancer_anno_ids=None, domain_anno_ids=None, **kwargs):
+    def __init__(self, features, coords, gene_exp, obs_gene_ids, hvg_ids, hvg_gene_names, tech_ids, specie_ids, organ_ids, cancer_anno_ids=None, domain_anno_ids=None, **kwargs):
         self.features = features
         self.coords = coords
         self.gene_exp = gene_exp
         self.obs_gene_ids = obs_gene_ids
         self.hvg_ids = hvg_ids
+        self.hvg_gene_names = hvg_gene_names
         self.tech_ids = tech_ids
         self.specie_ids = specie_ids
         self.organ_ids = organ_ids
@@ -212,6 +214,7 @@ class STDataset(Dataset):
                 gene_exp=gene_exp,
                 obs_gene_ids=obs_gene_ids,
                 hvg_ids=hvg_ids,
+                hvg_gene_names=hvg_gene_names,
                 tech_ids=tech,
                 specie_ids=specie,
                 organ_ids=organ,
@@ -225,6 +228,10 @@ class STDataset(Dataset):
 
     def get_dataset_name(self, idx):
         return self.dataset_list[idx].name
+
+    def get_hvg_names(self, idx):
+        hvg_gene_names = self.st_datasets[idx].hvg_gene_names
+        return self.tokenizer.ge_tokenizer.symbol2id(hvg_gene_names)
 
     def generate_masked_ge_tokens(self, n_spots):
         mask_token = self.tokenizer.ge_tokenizer.mask_token.float()

@@ -4,6 +4,8 @@ This is our PyTorch implementation for the paper:
 
 > Tinglin Huang, Tianyu Liu, Mehrtash Babadi, Rex Ying, and Wengong Jin (2025). STPath: A Generative Foundation Model for Integrating Spatial Transcriptomics and Whole Slide Images. Paper in [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.04.19.649665v2.abstract).
 
+The pretrained model weight is available at [Hugging Face](https://huggingface.co/tlhuang/STPath).
+
 ## Dataset Preparation
 
 First, download the datasets from the following links:
@@ -157,7 +159,7 @@ print(f"Pearson correlation for {sample_id}: {np.mean(all_pearson_list)}")  # 0.
 ## TODO
 
 * Dataset preprocessing pipeline [x]
-* Upload pretrained weight
+* Upload pretrained weight [x]
 * Training pipeline
 * Evaluation pipeline
     * Gene expression prediction [x]

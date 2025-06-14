@@ -155,3 +155,72 @@ class STPathInference:
             return torch.log1p(x)
         else:
             raise TypeError(f"Unsupported type: {type(x)}. Expected numpy array or torch tensor.")
+
+
+if __name__ == "__main__":
+    import scanpy as sc
+    from stpath.data.sampling_utils import PatchSampler
+    from stpath.hest_utils.st_dataset import load_adata
+    from stpath.hest_utils.file_utils import read_assets_from_h5
+    from scipy.stats import pearsonr
+
+    sample_id = "INT2"
+    gene_voc_path = "/home/ti.huang/STPath/utils_data/symbol2ensembl.json"
+    model_weight_path = '/home/ti.huang/project/stfm/stpath/backup/stfm.pth'
+    agent = STPathInference(gene_voc_path, model_weight_path, device=0)
+
+    source_dataroot = "/home/ti.huang/STPath/example_data"
+    with open(os.path.join(source_dataroot, "var_50genes.json")) as f:
+        hvg_list = json.load(f)['genes']
+    
+    data_dict, _ = read_assets_from_h5(os.path.join(source_dataroot, f"{sample_id}.h5"))
+    coords = data_dict["coords"]
+    embeddings = data_dict["embeddings"]
+    barcodes = data_dict["barcodes"].flatten().astype(str).tolist()
+    adata = sc.read_h5ad(os.path.join(source_dataroot, f"{sample_id}.h5ad"))[barcodes, :]
+
+    pred_adata = agent.inference(
+        coords=coords, 
+        img_features=embeddings, 
+        organ_type="Kidney", 
+        tech_type="Visium",
+        save_gene_names=hvg_list
+    )
+    # save adata
+    # pred_adata.write_h5ad(f"/home/ti.huang/STPath/example_data/pred_{sample_id}.h5ad")
+
+    all_pearson_list = []
+    gt = np.log1p(adata[:, hvg_list].X.toarray())  # sparse -> dense
+    pred = pred_adata.X
+    for i in range(len(hvg_list)):
+        pearson_corr, _ = pearsonr(gt[:, i], pred[:, i])
+        all_pearson_list.append(pearson_corr.item())
+    print(f"Pearson correlation for {sample_id}: {np.mean(all_pearson_list)}")
+
+    """Performing Prediction with Context"""
+    rightest_coord = np.where(coords[:, 0] == coords[:, 0].max())[0][0]
+    masked_ids = PatchSampler.sample_nearest_patch(coords, int(len(coords) * 0.95), rightest_coord)
+    context_ids = np.setdiff1d(np.arange(len(coords)), masked_ids)  # the index not in masked_ids will be used as context
+    context_gene_exps = adata.X.toarray()[context_ids]
+    context_gene_names = adata.var_names.tolist()
+    
+    pred_adata = agent.inference(
+        coords=adata.obsm['spatial'], 
+        img_features=embeddings, 
+        context_ids=context_ids, 
+        context_gene_exps=context_gene_exps, 
+        context_gene_names=context_gene_names, 
+        organ_type="Kidney", 
+        tech_type="Visium", 
+        save_gene_names=hvg_list,
+    )
+    # save adata
+    # pred_adata.write_h5ad(f"/home/ti.huang/STPath/example_data/pred_{sample_id}_context.h5ad")
+
+    all_pearson_list = []
+    gt = np.log1p(adata[:, hvg_list].X.toarray())[masked_ids, :]  # sparse -> dense
+    pred = pred_adata.X[masked_ids, :]
+    for i in range(len(hvg_list)):
+        pearson_corr, _ = pearsonr(gt[:, i], pred[:, i])
+        all_pearson_list.append(pearson_corr.item())
+    print(f"Pearson correlation for {sample_id}: {np.mean(all_pearson_list)}")
