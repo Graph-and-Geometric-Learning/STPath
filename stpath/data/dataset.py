@@ -273,7 +273,7 @@ class STDataset(Dataset):
             st_dataset = self.st_datasets[idx]
         else:
             dataset = self.dataset_list[idx]
-            st_dataset = self.load_adata(dataset, self.tokenizer, self.normalize_method, self.meta_data_dict)
+            st_dataset = self.load_adata(dataset, self.tokenizer, self.normalize_method, self.meta_data_dict, self.n_hvg)
 
         sampled_idx = self.patch_sampler(st_dataset.coords)
         features, coords, gene_exp, obs_gene_ids, obs_hvg_gene_ids, \

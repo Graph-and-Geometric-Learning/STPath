@@ -75,12 +75,12 @@ class GeneExpTokenizer(TokenizerBase):
             sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes)
             hvg_names = adata.var_names[adata.var['highly_variable']][:n_top_genes].tolist()
 
-        hvg_names = [g for g in hvg_names if g in self.symbol2gene and self.symbol2gene[g] is not None]
-        hvg_gene_ids = np.array([self.gene2id[self.symbol2gene[g]] for g in hvg_names if self.symbol2gene[g] in self.gene2id])
+        hvg_names = [g for g in hvg_names if g in self.symbol2gene and self.symbol2gene[g.upper()] is not None]
+        hvg_gene_ids = np.array([self.gene2id[self.symbol2gene[g.upper()]] for g in hvg_names if self.symbol2gene[g.upper()] in self.gene2id])
         return hvg_names, torch.from_numpy(hvg_gene_ids).long()
 
     def encode(self, adata, return_sparse=False):
-        gene_list = [g for g in adata.var_names.tolist() if g in self.symbol2gene and self.symbol2gene[g] is not None and self.symbol2gene[g] in self.gene2id]
+        gene_list = [g for g in adata.var_names.tolist() if g.upper() in self.symbol2gene and self.symbol2gene[g.upper()] is not None and self.symbol2gene[g.upper()] in self.gene2id]
         adata = adata[:, gene_list]
 
         if not isinstance(adata.X, np.ndarray):
@@ -93,7 +93,7 @@ class GeneExpTokenizer(TokenizerBase):
             row, col = np.nonzero(adata.X)
             act_gene_exp = adata.X[row, col]
 
-        obs_gene_ids = np.array([self.gene2id[self.symbol2gene[g]] for g in adata.var_names.tolist()])  # TODO: there might be some genes sharing the same id so some expression values will be missing
+        obs_gene_ids = np.array([self.gene2id[self.symbol2gene[g.upper()]] for g in adata.var_names.tolist()])  # TODO: there might be some genes sharing the same id so some expression values will be missing
         col = obs_gene_ids[col]
         obs_gene_ids = torch.from_numpy(obs_gene_ids).long()
         act_gene_exp = torch.from_numpy(act_gene_exp).float()
